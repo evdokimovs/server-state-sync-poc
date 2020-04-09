@@ -1,0 +1,12 @@
+[package]
+name = "server-state-sync-poc"
+version = "0.1.0"
+authors = ["Semen Evdokimov <evdokimovs@protonmail.ch>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = "0.3"
+medea-reactive = { path = "../medea/crates/medea-reactive" }
+tokio = { version = "0.2", features = ["full"] }
