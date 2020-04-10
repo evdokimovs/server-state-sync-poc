@@ -187,13 +187,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "medea-reactive"
-version = "0.1.0-dev"
-dependencies = [
- "futures",
-]
-
-[[package]]
 name = "memchr"
 version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -337,7 +330,6 @@ name = "server-state-sync-poc"
 version = "0.1.0"
 dependencies = [
  "futures",
- "medea-reactive",
  "tokio",
 ]
 
