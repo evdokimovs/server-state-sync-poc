@@ -1,5 +1,6 @@
-use crate::snapshot::RoomSnapshot;
 use std::collections::HashSet;
+
+use crate::snapshot::RoomSnapshot;
 
 #[derive(Debug)]
 pub enum Command {

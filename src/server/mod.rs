@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::{
     rpc_connection::ServerRpcConnection,
     server::{room::Room, snapshot_resolver::SnapshotResolver},
@@ -5,16 +7,16 @@ use crate::{
 };
 
 mod peer;
-mod room;
+pub mod room;
 pub mod snapshot_resolver;
 mod track;
 
 pub struct Server {
-    room: SnapshotResolver,
+    room: Rc<RefCell<Room>>,
 }
 
 impl Server {
-    pub fn new(resolver: SnapshotResolver) -> Self {
-        Self { room: resolver }
+    pub fn new(room: Rc<RefCell<Room>>) -> Self {
+        Self { room }
     }
 }

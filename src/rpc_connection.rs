@@ -1,6 +1,8 @@
-use crate::proto::{Command, Event};
-use futures::{channel::mpsc, Stream};
 use std::{cell::RefCell, pin::Pin, rc::Rc};
+
+use futures::{channel::mpsc, Stream};
+
+use crate::proto::{Command, Event};
 
 struct InnerRpcConnection {
     event_sender: Option<mpsc::UnboundedSender<Event>>,

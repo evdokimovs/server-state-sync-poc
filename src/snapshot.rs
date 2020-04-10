@@ -1,8 +1,7 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use futures::Stream;
 use medea_reactive::{collections::ObservableVec, Observable};
-use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct RoomSnapshot {

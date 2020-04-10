@@ -1,11 +1,12 @@
+use std::time::Duration;
+
 use tokio::task::LocalSet;
 
 use crate::{
     client::Client,
     rpc_connection::RpcConnection,
-    server::{snapshot_resolver::SnapshotResolver, Server},
+    server::{room::Room, snapshot_resolver::SnapshotResolver, Server},
 };
-use std::time::Duration;
 
 mod client;
 mod proto;
@@ -19,17 +20,19 @@ async fn main() {
 
     local
         .run_until(async move {
-            let snapshot_resolver = SnapshotResolver::new();
+            let room = Room::new();
 
             let alice_rpc = RpcConnection::new();
             let alice_client = Client::new(1, Box::new(alice_rpc.clone()));
-            snapshot_resolver.new_member_conn(1, Box::new(alice_rpc.clone()));
+            room.borrow_mut()
+                .new_member_conn(1, Box::new(alice_rpc.clone()));
 
             let bob_rpc = RpcConnection::new();
             let bob_client = Client::new(2, Box::new(bob_rpc.clone()));
-            snapshot_resolver.new_member_conn(2, Box::new(bob_rpc.clone()));
+            room.borrow_mut()
+                .new_member_conn(2, Box::new(bob_rpc.clone()));
 
-            let server = Server::new(snapshot_resolver);
+            let server = Server::new(room);
 
             alice_client.reconnect();
 

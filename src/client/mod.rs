@@ -1,3 +1,4 @@
+use futures::StreamExt;
 use tokio::task::spawn_local;
 
 use crate::{
@@ -6,7 +7,6 @@ use crate::{
     rpc_connection::ClientRpcConnection,
     snapshot::{PeerSnapshot, RoomSnapshot},
 };
-use futures::StreamExt;
 
 mod peer;
 mod room;
