@@ -1,8 +1,7 @@
-use std::collections::HashSet;
-
 use crate::snapshot::RoomSnapshot;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum Command {
     MakeSdpOffer {
         peer_id: u64,
@@ -27,9 +26,17 @@ pub enum Command {
 
 #[derive(Debug)]
 pub enum Event {
-    SnapshotSynchronized { snapshot: RoomSnapshot },
+    SnapshotSynchronized {
+        snapshot: RoomSnapshot,
+    },
 
-    SdpAnswerMade { peer_id: u64, sdp_answer: String },
+    SdpAnswerMade {
+        peer_id: u64,
+        sdp_answer: String,
+    },
 
-    PeersRemoved { peers_ids: Vec<u64> },
+    #[allow(dead_code)]
+    PeersRemoved {
+        peers_ids: Vec<u64>,
+    },
 }

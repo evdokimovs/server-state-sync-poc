@@ -5,7 +5,7 @@ use tokio::task::LocalSet;
 use crate::{
     client::Client,
     rpc_connection::RpcConnection,
-    server::{room::Room, snapshot_resolver::SnapshotResolver, Server},
+    server::{Room, Server},
 };
 
 mod client;
@@ -28,11 +28,11 @@ async fn main() {
                 .new_member_conn(1, Box::new(alice_rpc.clone()));
 
             let bob_rpc = RpcConnection::new();
-            let bob_client = Client::new(2, Box::new(bob_rpc.clone()));
+            let _bob_client = Client::new(2, Box::new(bob_rpc.clone()));
             room.borrow_mut()
                 .new_member_conn(2, Box::new(bob_rpc.clone()));
 
-            let server = Server::new(room);
+            let _server = Server::new(room);
 
             alice_client.reconnect();
 

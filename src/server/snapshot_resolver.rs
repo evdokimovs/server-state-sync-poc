@@ -1,3 +1,6 @@
+//! Implementation of the service which processes [`Command`]s from client and
+//! [`Event`]s.
+
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -17,16 +20,23 @@ use crate::{
 pub(crate) type MemberId = u64;
 
 struct SnapshotResolverInner {
-    current_snapshot: RefCell<HashMap<MemberId, RoomSnapshot>>,
+    /// Actual snapshot of the [`Room`] which owns this [`SnapshotResolver`].
+    snapshot: RefCell<HashMap<MemberId, RoomSnapshot>>,
+
+    /// Weak reference to the [`Room`] which owns this [`SnapshotResolver`].
     room: Weak<RefCell<Room>>,
+
+    /// RPC connections with [`MemberId`]s.
     connections: RefCell<HashMap<MemberId, Box<dyn ServerRpcConnection>>>,
+
+    /// List of `Member`s which [`RoomSnapshot`]s are currently syncing.
     members_in_sync_state: RefCell<HashSet<MemberId>>,
 }
 
 impl SnapshotResolverInner {
     pub fn new(room: Weak<RefCell<Room>>) -> Self {
         Self {
-            current_snapshot: RefCell::new(HashMap::new()),
+            snapshot: RefCell::new(HashMap::new()),
             room,
             connections: RefCell::new(HashMap::new()),
             members_in_sync_state: RefCell::new(HashSet::new()),
@@ -34,14 +44,18 @@ impl SnapshotResolverInner {
     }
 }
 
+/// Service which processes [`Command`]s from client and [`Event`]s.
 #[derive(Clone)]
 pub struct SnapshotResolver(Rc<SnapshotResolverInner>);
 
 impl SnapshotResolver {
+    /// Returns new [`SnapshotResolver`].
     pub fn new(room: Weak<RefCell<Room>>) -> Self {
         Self(Rc::new(SnapshotResolverInner::new(room)))
     }
 
+    /// Inserts new `Member`'s [`ServerRpcConnection`] and starts polling
+    /// [`Command`]s from it.
     pub fn new_member_conn(
         &self,
         member_id: MemberId,
@@ -59,7 +73,7 @@ impl SnapshotResolver {
             },
         );
         self.0
-            .current_snapshot
+            .snapshot
             .borrow_mut()
             .insert(member_id.clone(), room_snap);
 
@@ -74,6 +88,8 @@ impl SnapshotResolver {
         });
     }
 
+    /// Processes [`Command::SynchronizeMe`] or pass normal [`Command`]s to the
+    /// [`Room`].
     fn on_command(&self, member_id: MemberId, command: Command) {
         match command {
             Command::MakeSdpAnswer {
@@ -92,9 +108,11 @@ impl SnapshotResolver {
         }
     }
 
+    /// Sends [`Event`] to the `Member`, updates [`RoomSnapshot`] of this
+    /// `Member`.
     pub fn send_event(&self, member_id: u64, event: Event) {
         if let Some(current_snapshot) =
-            self.0.current_snapshot.borrow_mut().get_mut(&member_id)
+            self.0.snapshot.borrow_mut().get_mut(&member_id)
         {
             match &event {
                 Event::PeersRemoved { peers_ids } => {
@@ -111,7 +129,7 @@ impl SnapshotResolver {
                         peer.sdp_answer = Some(sdp_answer.clone());
                     }
                 }
-                Event::SnapshotSynchronized { snapshot } => {
+                Event::SnapshotSynchronized { snapshot: _ } => {
                     self.0
                         .members_in_sync_state
                         .borrow_mut()
@@ -128,9 +146,10 @@ impl SnapshotResolver {
         }
     }
 
+    /// Synchronizes client and server [`RoomSnapshot`]s after reconnection.
     fn sync(&self, member_id: MemberId, with_snapshot: RoomSnapshot) {
         let peer_diffs: Vec<_> = if let Some(room_snapshot) =
-            self.0.current_snapshot.borrow().get(&member_id)
+            self.0.snapshot.borrow().get(&member_id)
         {
             self.0.members_in_sync_state.borrow_mut().insert(member_id);
             with_snapshot
@@ -157,13 +176,8 @@ impl SnapshotResolver {
             }
         }
 
-        let final_room_snapshot = self
-            .0
-            .current_snapshot
-            .borrow()
-            .get(&member_id)
-            .unwrap()
-            .clone();
+        let final_room_snapshot =
+            self.0.snapshot.borrow().get(&member_id).unwrap().clone();
         self.send_event(
             member_id,
             Event::SnapshotSynchronized {

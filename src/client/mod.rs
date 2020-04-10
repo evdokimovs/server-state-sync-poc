@@ -2,19 +2,14 @@ use futures::StreamExt;
 use tokio::task::spawn_local;
 
 use crate::{
-    client::room::Room,
     proto::Command,
     rpc_connection::ClientRpcConnection,
     snapshot::{PeerSnapshot, RoomSnapshot},
 };
 
-mod peer;
-mod room;
-mod track;
-
 fn test_room_snapshot() -> RoomSnapshot {
     let mut room = RoomSnapshot::new();
-    let mut peer = PeerSnapshot {
+    let peer = PeerSnapshot {
         sdp_offer: Some("hello".to_string()),
         sdp_answer: None,
     };
@@ -24,7 +19,6 @@ fn test_room_snapshot() -> RoomSnapshot {
 }
 
 pub struct Client {
-    room: Room,
     rpc: Box<dyn ClientRpcConnection>,
 }
 
@@ -37,10 +31,7 @@ impl Client {
             }
         });
 
-        Self {
-            room: Room::new(),
-            rpc,
-        }
+        Self { rpc }
     }
 
     pub fn reconnect(&self) {

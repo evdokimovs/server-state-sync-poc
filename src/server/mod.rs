@@ -1,17 +1,14 @@
-use std::{cell::RefCell, rc::Rc};
-
-use crate::{
-    rpc_connection::ServerRpcConnection,
-    server::{room::Room, snapshot_resolver::SnapshotResolver},
-    snapshot::RoomSnapshot,
-};
-
 mod peer;
-pub mod room;
-pub mod snapshot_resolver;
+mod room;
+mod snapshot_resolver;
 mod track;
 
+use std::{cell::RefCell, rc::Rc};
+
+pub use self::{room::Room, snapshot_resolver::SnapshotResolver};
+
 pub struct Server {
+    #[allow(dead_code)]
     room: Rc<RefCell<Room>>,
 }
 

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     proto::Event,
@@ -7,17 +7,17 @@ use crate::{
         peer::PeerConnection,
         snapshot_resolver::{MemberId, SnapshotResolver},
     },
-    snapshot::RoomSnapshot,
 };
 
 pub struct Room {
+    #[allow(dead_code)]
     peers: Vec<PeerConnection>,
     snapshot_resolver: Option<SnapshotResolver>,
 }
 
 impl Room {
     pub fn new() -> Rc<RefCell<Self>> {
-        let mut this = Rc::new(RefCell::new(Self {
+        let this = Rc::new(RefCell::new(Self {
             peers: Vec::new(),
             snapshot_resolver: None,
         }));
@@ -28,19 +28,19 @@ impl Room {
         this
     }
 
-    pub fn on_make_sdp_offer(&mut self, peer_id: u64, sdp_offer: String) {
+    pub fn on_make_sdp_offer(&mut self, _peer_id: u64, _sdp_offer: String) {
         self.snapshot_resolver.as_ref().unwrap().send_event(
             1,
             Event::SdpAnswerMade {
                 peer_id: 1,
-                sdp_answer: "hello".to_string(),
+                sdp_answer: "Hello world!".to_string(),
             },
         );
         self.snapshot_resolver.as_ref().unwrap().send_event(
             2,
             Event::SdpAnswerMade {
                 peer_id: 1,
-                sdp_answer: "hello".to_string(),
+                sdp_answer: "Hello world!".to_string(),
             },
         );
     }
